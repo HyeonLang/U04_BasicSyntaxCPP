@@ -18,7 +18,7 @@ protected:
 
 private:
 	UFUNCTION()
-	void UpdateParameter();
+	void UpdateParameters();
 
 protected:
 	UPROPERTY(VisibleAnywhere)

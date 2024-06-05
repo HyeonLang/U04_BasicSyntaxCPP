@@ -1,5 +1,6 @@
 #include "CStaticMeshBase.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
@@ -31,8 +32,15 @@ void ACStaticMeshBase::BeginPlay()
 	
 }
 
-void ACStaticMeshBase::UpdateParameter()
+void ACStaticMeshBase::UpdateParameters()
 {
+	FLinearColor RandomColor;
+	RandomColor.R = UKismetMathLibrary::RandomFloatInRange(0.f, 1.f);
+	RandomColor.G = UKismetMathLibrary::RandomFloatInRange(0.f, 1.f);
+	RandomColor.B = UKismetMathLibrary::RandomFloatInRange(0.f, 1.f);
+	RandomColor.A = 1.f;
+	DynamicMaterial->SetVectorParameterValue("BaseColor", RandomColor);
 
-	//DynamicMaterial->SetVectorParameterValue("BaseColor", )
+	DynamicMaterial->SetScalarParameterValue("Metallic", RandomColor.R);
+	DynamicMaterial->SetScalarParameterValue("Roughness", RandomColor.G);
 }
