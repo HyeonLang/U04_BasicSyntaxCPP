@@ -13,5 +13,7 @@ UCLASS()
 class U04_THIRDPERSONCPP_API AU04_ThirdPersonCPPGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
+public:
+	AU04_ThirdPersonCPPGameModeBase();
 	
 };
