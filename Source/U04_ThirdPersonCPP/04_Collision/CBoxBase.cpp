@@ -4,7 +4,6 @@
 
 ACBoxBase::ACBoxBase()
 {
-	//Todo. Collision Dynamic Delegate(C++ DELEGATE)
 	RootComp = CreateDefaultSubobject<USceneComponent>("RootComp");
 	RootComponent = RootComp;
 

@@ -20,12 +20,11 @@ protected:
 
 protected:
 	UPROPERTY(VisibleAnywhere)
-	USceneComponent* SceneComp;
+	USceneComponent* RootComp;
 
 	UPROPERTY(VisibleAnywhere)
 	UBoxComponent* BoxComp;
 
 	UPROPERTY(VisibleAnywhere)
 	UTextRenderComponent* TextRenderComp;
-
 };
