@@ -17,6 +17,10 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Character")
 	float Speed;
 
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Character")
+	bool bEquipped;
+
+
 private:
 	APawn* OnwerPawn;
 };
