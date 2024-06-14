@@ -1,6 +1,7 @@
 #include "CWeapon.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/Character.h"
+#include "Global.h"
 
 ACWeapon::ACWeapon()
 {
@@ -27,7 +28,7 @@ ACWeapon::ACWeapon()
 	ConstructorHelpers::FObjectFinder<UAnimMontage> UnequipMontageAsset(TEXT("/Game/Character/Animations/AR4/Unequip_Montage"));
 	if (UnequipMontageAsset.Succeeded())
 	{
-		UnequipMontage = EquipMontageAsset.Object;
+		UnequipMontage = UnequipMontageAsset.Object;
 	}
 }
 
@@ -48,6 +49,16 @@ void ACWeapon::Tick(float DeltaTime)
 
 }
 
+void ACWeapon::Begin_Aiming()
+{
+	bAiming = true; 
+}
+
+void ACWeapon::End_Aiming()
+{
+	bAiming = false;
+}
+
 void ACWeapon::Equip()
 {
 	if (bEquipping) return;
@@ -60,7 +71,6 @@ void ACWeapon::Equip()
 void ACWeapon::Begin_Equip()
 {
 	bEquipped = true;
-
 	AttachToComponent
 	(
 		OwnerCharacter->GetMesh(),
@@ -79,7 +89,6 @@ void ACWeapon::Unequip()
 {
 	if (bEquipping) return;
 	if (!bEquipped) return;
-
 	bEquipping = true;
 	OwnerCharacter->PlayAnimMontage(UnequipMontage);
 }
@@ -87,7 +96,6 @@ void ACWeapon::Unequip()
 void ACWeapon::Begin_Unequip()
 {
 	bEquipped = false;
-
 	AttachToComponent
 	(
 		OwnerCharacter->GetMesh(),
