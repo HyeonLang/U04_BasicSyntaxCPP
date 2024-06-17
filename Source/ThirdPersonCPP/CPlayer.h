@@ -26,6 +26,8 @@ private:
 	void OnSprint();
 	void OffSprint();
 
+	void OnOpen();
+
 private:
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArmComp;
@@ -34,4 +36,9 @@ private:
 	UCameraComponent* CameraComp;
 
 
+public:
+	AActor* OtherActor;
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<bool> Keys;
 };

@@ -1,4 +1,6 @@
 #include "CPlayer.h"
+#include "Assignment/CChest.h"
+#include "Assignment/CDoor.h"
 #include "Global.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -41,7 +43,10 @@ ACPlayer::ACPlayer()
 void ACPlayer::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	for (int32 i = 0; i < 3; i++)
+	{
+		Keys.Add(false);
+	}
 }
 
 void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -55,6 +60,8 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	
 	PlayerInputComponent->BindAction("Sprint", EInputEvent::IE_Pressed, this, &ACPlayer::OnSprint);
 	PlayerInputComponent->BindAction("Sprint", EInputEvent::IE_Released, this, &ACPlayer::OffSprint);
+
+	PlayerInputComponent->BindAction("Open", EInputEvent::IE_Pressed, this, &ACPlayer::OnOpen);
 }
 
 void ACPlayer::OnMoveForward(float Axis)
@@ -82,4 +89,29 @@ void ACPlayer::OffSprint()
 {
 	GetCharacterMovement()->MaxWalkSpeed = 400.f;
 }
+
+void ACPlayer::OnOpen()
+{
+	ACChest* Chest = Cast<ACChest>(OtherActor);
+	FName CurrentKey;
+	if (Chest)
+	{
+		Chest->Open(CurrentKey);
+		if (CurrentKey == "RED")
+			Keys[0] = true;
+		if (CurrentKey == "GREEN")
+			Keys[1] = true;
+		if (CurrentKey == "BLUE")
+			Keys[2] = true;
+	}
+
+	ACDoor* Door = Cast<ACDoor>(OtherActor);
+	if (Door)
+	{
+		Door->Open(Keys);
+	}
+}
+	
+
+
 
