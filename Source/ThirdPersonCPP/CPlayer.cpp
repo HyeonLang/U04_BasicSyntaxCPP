@@ -9,6 +9,8 @@
 #include "CAnimInstance.h"
 #include "CWeapon.h"
 #include "Widgets/CCrossHairWidget.h"
+#include "Widgets/CWeaponWidget.h"
+
 
 ACPlayer::ACPlayer()
 {
@@ -47,6 +49,12 @@ ACPlayer::ACPlayer()
 	{
 		CrossHairWidgetClass = CrossHairWidgetClassAsset.Class;
 	}
+
+	ConstructorHelpers::FClassFinder<UCWeaponWidget> WeaponWidgetClassAsset(TEXT("/Game/Widgets/WB_Weapon"));
+	if (WeaponWidgetClassAsset.Succeeded())
+	{
+		WeaponWidgetClass = WeaponWidgetClassAsset.Class;
+	}
 }
 
 void ACPlayer::ChangeSpeed(float InMoveSpeed)
@@ -74,6 +82,9 @@ void ACPlayer::BeginPlay()
 	CrossHairWidget = CreateWidget<UCCrossHairWidget, APlayerController>(GetController<APlayerController>(), CrossHairWidgetClass);
 	CrossHairWidget->AddToViewport();
 	CrossHairWidget->SetVisibility(ESlateVisibility::Hidden);
+
+	WeaponWidget = CreateWidget<UCWeaponWidget, APlayerController>(GetController<APlayerController>(), WeaponWidgetClass);
+	WeaponWidget->AddToViewport();
 }
 
 void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -95,6 +106,8 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &ACPlayer::OnFire);
 	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Released, this, &ACPlayer::OffFire);
+
+	PlayerInputComponent->BindAction("AutoFire", EInputEvent::IE_Pressed, this, &ACPlayer::OnAutoFire);
 }
 
 void ACPlayer::OnMoveForward(float Axis)
@@ -129,6 +142,7 @@ void ACPlayer::ToggleEquip()
 
 	if (Weapon->IsEquipped())
 	{
+		OffAim();
 		Weapon->Unequip();
 	}
 	else
@@ -158,6 +172,7 @@ void ACPlayer::OnAim()
 
 void ACPlayer::OffAim()
 {
+	Weapon->End_Fire();
 	if (Weapon == nullptr) return;
 	if (Weapon->IsEquipped() == false) return;
 	if (Weapon->IsEquipping() == true) return;
@@ -169,9 +184,7 @@ void ACPlayer::OffAim()
 	SpringArmComp->SocketOffset = FVector(0, 60, 0);
 
 	End_Zoom();
-
 	Weapon->End_Aiming();
-
 	CrossHairWidget->SetVisibility(ESlateVisibility::Hidden);
 }
 
@@ -183,6 +196,16 @@ void ACPlayer::OnFire()
 void ACPlayer::OffFire()
 {
 	Weapon->End_Fire();
+}
+
+void ACPlayer::OnAutoFire()
+{
+	if (Weapon->IsFireing()) return;
+
+	Weapon->ToggleAutoFire();
+
+	Weapon->IsAutoFire() ? WeaponWidget->OnAutoFire() : WeaponWidget->OffAutoFire();
+
 }
 
 

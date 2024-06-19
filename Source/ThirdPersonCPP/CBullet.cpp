@@ -20,6 +20,8 @@ ACBullet::ACBullet()
 		MeshComp->SetMaterial(0, MaterialAsset.Object);
 	}
 	MeshComp->SetRelativeScale3D(FVector(1.f, 0.025f, 0.025f));
+	MeshComp->CastShadow = false;
+	SetActorEnableCollision(false);
 
 	ProjectileComp = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileComp");
 	ProjectileComp->InitialSpeed = 2e+4f;
