@@ -8,12 +8,16 @@
 #include "Global.h"
 #include "CPlayer.h"
 #include "CBullet.h"
+#include "CMagazine.h"
 
 static TAutoConsoleVariable<bool> CVarDebugLine(TEXT("Tore.DrawDebugLine"), false, TEXT("Enable Draw Aim Line"), ECVF_Cheat);
 
 ACWeapon::ACWeapon()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	MaxBullet = 30;
+	CurrentBullet = MaxBullet;
 
 	FireInterval = 0.1f;
 	PitchSpeed = 0.25f;
@@ -41,6 +45,12 @@ ACWeapon::ACWeapon()
 		UnequipMontage = UnequipMontageAsset.Object;
 	}
 
+	ConstructorHelpers::FObjectFinder<UAnimMontage> ReloadMontageAsset(TEXT("/Game/Character/Animations/AR4/Rifle_Jog_Reload_Montage"));
+	if (ReloadMontageAsset.Succeeded())
+	{
+		ReloadMontage = ReloadMontageAsset.Object;
+	}
+
 	ConstructorHelpers::FClassFinder<UCameraShake> CameraShakeClassAsset(TEXT("/Game/BP_FireShake"));
 	if (UnequipMontageAsset.Succeeded())
 	{
@@ -52,7 +62,6 @@ ACWeapon::ACWeapon()
 	{
 		BulletClass = BulletClassAsset.Class;
 	}
-
 
 }
 
@@ -121,6 +130,7 @@ void ACWeapon::Begin_Fire()
 	if (bEquipping == true) return;
 	if (bAiming == false) return;
 	if (bFiring == true) return;
+	if (bReloading == true) return;
 
 	bFiring = true;
 	CurrentPitch = 0.f;
@@ -146,11 +156,18 @@ void ACWeapon::End_Fire()
 
 void ACWeapon::Firing()
 {
+	if (CurrentBullet == 0)
+	{
+		return;
+	}
+	CurrentBullet -= 1;
+
 	ACPlayer* Player = Cast<ACPlayer>(OwnerCharacter);
 	if (Player)
 	{
-		APlayerController* PC = OwnerCharacter->GetController<APlayerController>();
+		Player->ChangeBulletCount();
 
+		APlayerController* PC = OwnerCharacter->GetController<APlayerController>();
 		if (CameraShakeClass)
 		{
 			PC->PlayerCameraManager->PlayCameraShake(CameraShakeClass);
@@ -220,10 +237,73 @@ void ACWeapon::Firing()
 	}
 }
 
+void ACWeapon::Reloading()
+{
+	if (bEquipping) return;
+	if (!bEquipped) return;
+	bReloading = true;
+	
+	OwnerCharacter->PlayAnimMontage(ReloadMontage);
+
+}
+
+void ACWeapon::Begin_Reload()
+{
+	CurrentBullet = MaxBullet;
+	ACPlayer* Player = Cast<ACPlayer>(OwnerCharacter);
+
+	FTransform MagTransform = Player->GetMesh()->GetSocketTransform("Mag_Hand"); 
+	if (MagClass)
+	{
+		Magazine = GetWorld()->SpawnActor<ACMagazine>(MagClass, MagTransform);
+		if (Magazine)
+		{
+			
+			Magazine->AttachToComponent(OwnerCharacter->GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), "Mag_Hand");
+			Magazine->GetMeshComp()->SetSimulatePhysics(false);
+		}
+	}
+}
+
+void ACWeapon::Out_Reload()
+{
+	if (MeshComp)
+	{
+		MeshComp->HideBoneByName("b_gun_mag", EPhysBodyOp::PBO_None);
+	}
+
+	FTransform MagTransform = MeshComp->GetSocketTransform("b_gun_mag");
+	if (MagClass)
+	{
+		GetWorld()->SpawnActor<ACMagazine>(MagClass, MagTransform);
+
+	}
+}
+
+void ACWeapon::End_Reload()
+{
+	CurrentBullet = MaxBullet;
+	ACPlayer* Player = Cast<ACPlayer>(OwnerCharacter);
+	if (Player)
+	{
+		Player->ChangeBulletCount();
+	}
+	if (Magazine)
+	{
+		Magazine->K2_DestroyActor();
+	}
+	if (MeshComp)
+	{
+		MeshComp->UnHideBoneByName("b_gun_mag");
+	}
+	bReloading = false;
+}
+
 void ACWeapon::Equip()
 {
 	if (bEquipping) return;
 	if (bEquipped) return;
+	if (bReloading) return;
 
 	bEquipping = true;
 	OwnerCharacter->PlayAnimMontage(EquipMontage);
@@ -250,6 +330,7 @@ void ACWeapon::Unequip()
 {
 	if (bEquipping) return;
 	if (!bEquipped) return;
+	if (bReloading) return;
 	bEquipping = true;
 	OwnerCharacter->PlayAnimMontage(UnequipMontage);
 }

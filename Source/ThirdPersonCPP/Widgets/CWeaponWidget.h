@@ -17,4 +17,11 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OffAutoFire();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnReload(int32 InMaxBullet);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnCurrentBulletDiscount(int32 InCurrentBullet);
+	
 };

@@ -23,6 +23,7 @@ public:
 	UFUNCTION(Exec)
 	void ChangeSpeed(float InMoveSpeed = 400);
 
+	UFUNCTION(BlueprintCallable)
 	FORCEINLINE ACWeapon* GetWeapon() override { return Weapon; }
 	virtual void GetAimInfo(FVector& OutAimStart, FVector& OutAimEnd, FVector& OutAimDirection) override;
 	virtual void OnTarget() override;
@@ -48,10 +49,13 @@ private:
 	void OffFire();
 
 	void OnAutoFire();
+	void OnReload();
 
 public:
 	UFUNCTION(BlueprintCallable)
 	void SetBodyColor(FLinearColor InBodyColor, FLinearColor InLogoColor);
+
+	void ChangeBulletCount();
 
 protected:
 	UFUNCTION(BlueprintImplementableEvent)

@@ -11,6 +11,7 @@ class ACBullet;
 class UParticleSystem;
 class USoundCue;
 class UMaterialInstanceConstant;
+class ACMagazine;
 
 UCLASS()
 class THIRDPERSONCPP_API ACWeapon : public AActor
@@ -34,6 +35,8 @@ public:
 
 	FORCEINLINE bool IsFireing() { return bFiring; }
 	FORCEINLINE bool IsAutoFire() { return bAutoFire; }
+	FORCEINLINE bool IsReloading() { return bReloading; }
+	FORCEINLINE int32 GetCurrentBullet() { return CurrentBullet; }
 
 	void ToggleAutoFire();
 
@@ -46,6 +49,11 @@ public:
 	UFUNCTION()
 	void Firing();
 
+	void Reloading();
+	void Begin_Reload();
+	void Out_Reload();
+	void End_Reload();
+
 	void Equip();
 	void Begin_Equip();
 	void End_Equip();
@@ -57,6 +65,9 @@ public:
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "BulletClass")
 	TSubclassOf<ACBullet> BulletClass;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "MagClass")
+	TSubclassOf<ACMagazine> MagClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "AutoFire")
 	float FireInterval;
@@ -76,6 +87,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Montage")
 	UAnimMontage* UnequipMontage;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Montage")
+	UAnimMontage* ReloadMontage;
+
 	UPROPERTY(EditDefaultsOnly, Category = "CameraShake")
 	TSubclassOf<UCameraShake> CameraShakeClass;
 
@@ -94,6 +108,13 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Effects")
 	UMaterialInstanceConstant* DecalMaterial;
 
+protected:
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Bullet")
+	int32 MaxBullet;
+
+	UPROPERTY(BlueprintReadOnly)
+	int32 CurrentBullet;
+	
 private:
 	UPROPERTY(VisibleDefaultsOnly)
 	USkeletalMeshComponent* MeshComp;
@@ -105,8 +126,9 @@ private:
 	bool bAiming;
 	bool bFiring;
 	bool bAutoFire;
+	bool bReloading;
 
 	float CurrentPitch;
-
 	FTimerHandle AutoTimerHandle;
+	ACMagazine* Magazine;
 };

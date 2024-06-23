@@ -108,6 +108,8 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Released, this, &ACPlayer::OffFire);
 
 	PlayerInputComponent->BindAction("AutoFire", EInputEvent::IE_Pressed, this, &ACPlayer::OnAutoFire);
+
+	PlayerInputComponent->BindAction("Reload", EInputEvent::IE_Pressed, this, &ACPlayer::OnReload);
 }
 
 void ACPlayer::OnMoveForward(float Axis)
@@ -156,6 +158,7 @@ void ACPlayer::OnAim()
 	if (Weapon == nullptr) return;
 	if (Weapon->IsEquipped() == false) return;
 	if (Weapon->IsEquipping() == true) return;
+	if (Weapon->IsReloading() == true) return;
 
 	bUseControllerRotationYaw = true;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
@@ -190,6 +193,11 @@ void ACPlayer::OffAim()
 
 void ACPlayer::OnFire()
 {
+	if (Weapon->GetCurrentBullet() == 0) 
+	{
+		OnReload();
+		return;
+	}
 	Weapon->Begin_Fire();
 }
 
@@ -206,6 +214,19 @@ void ACPlayer::OnAutoFire()
 
 	Weapon->IsAutoFire() ? WeaponWidget->OnAutoFire() : WeaponWidget->OffAutoFire();
 
+}
+
+void ACPlayer::OnReload()
+{
+	if (Weapon->IsReloading()) return;
+	CLog::Print("JI");
+	OffAim();
+	Weapon->Reloading();
+}
+
+void ACPlayer::ChangeBulletCount()
+{
+	WeaponWidget->OnCurrentBulletDiscount(Weapon->GetCurrentBullet());
 }
 
 

@@ -19,4 +19,6 @@ public:
 	void OnTarget();
 	UFUNCTION(BlueprintImplementableEvent)
 	void OffTarget();
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnCountFire();
 };
